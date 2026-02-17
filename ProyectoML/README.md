@@ -16,17 +16,63 @@ Este proyecto aborda una problemática crítica en la educación superior:
 
 ---
 
+## Diccionario de Datos (Variables)
+
+El conjunto de datos contiene información sobre el ajuste académico y vocacional de los estudiantes de Ingeniería de Sistemas. A continuación se detallan las variables de entrada, su nombre técnico y la pregunta o ítem correspondiente de la encuesta.
+
+### Información Demográfica y Académica
+* **`semester`**: Semestre académico que cursa el estudiante actualmente.
+* **`major`**: Carrera o programa académico en el que se encuentra inscrito.
+
+### Expectativas y Ajuste de Carrera
+* **`interest_field`**: Mi interés por el campo profesional de la carrera es alto.
+* **`expectation_clarity`**: Antes de entrar, tenía claro de qué trataba la carrera.
+* **`expectation_alignment`**: La carrera ha cumplido mis expectativas iniciales.
+* **`career_expectations`**: La carrera cumple mis expectativas laborales futuras.
+
+### Desempeño y Hábitos Académicos
+* **`perceived_difficulty`**: El nivel de dificultad de las materias es alto.
+* **`study_habits`**: Tengo buenos hábitos de estudio.
+* **`time_management`**: Administro bien mi tiempo académico.
+* **`academic_stress`**: Mi nivel de estrés académico es alto.
+
+### Alineación Personal y Motivación
+* **`capacity_alignment`**: Mis capacidades personales se alinean con las exigencias de la carrera.
+* **`academic_enjoyment`**: Disfruto las actividades académicas propias de la carrera.
+* **`area_identification`**: Me siento identificado/a con el área de conocimiento de la carrera.
+* **`intrinsic_motivation`**: Mi motivación por la carrera es principalmente personal/vocacional.
+* **`extrinsic_motivation`**: Elegí esta carrera principalmente por factores externos (empleo, ingresos, presión).
+
+### Valor Social y Profesional
+* **`social_impact`**: Considero que esta carrera tiene un impacto positivo en la sociedad.
+* **`professional_value`**: La carrera es valorada social y profesionalmente.
+
+---
+
+### Nota sobre la escala de medición
+Todas las variables de percepción (ítems de la encuesta) utilizan una **Escala Likert de 5 puntos**, donde los valores numéricos corresponden a:
+
+| Valor | Etiqueta |
+| :---: | :--- |
+| 1 | Muy en desacuerdo |
+| 2 | En desacuerdo |
+| 3 | Ni de acuerdo ni en desacuerdo |
+| 4 | De acuerdo |
+| 5 | Muy de acuerdo |
+
+---
+
 ## Funcionamiento del Código (Pipeline de Preprocesamiento)
 
 El script proporcionado realiza un flujo completo de limpieza y transformación de datos, preparando el dataset para modelos de clasificación o regresión.
 
 ### 1. Carga y Limpieza Inicial
-* **Filtrado:** Selecciona exclusivamente a los estudiantes de **Ingeniería de Sistemas** para la etapa inicial.
+* **Filtrado:** Selecciona exclusivamente a los estudiantes de **Ingeniería de Sistemas**.
 * **Tratamiento de Escalas:** Transforma las respuestas cualitativas de la **Escala de Likert** (18 preguntas originales) en valores numéricos del 1 al 5.
 * **Gestión de Nulos:** Identifica y elimina registros con valores faltantes para asegurar la integridad estadística.
 
 ### 2. Análisis Estadístico y Visualización
-* **Estadística Descriptiva:** Calcula media, mediana, moda, desviación estándar y rango intercuartílico (IQR) a nivel general y de manera exclusiva para variables likert.
+* **Estadística Descriptiva:** Calcula media, mediana, moda, desviación estándar y rango intercuartílico (IQR).
 * **Detección de Outliers:** Utiliza el método IQR para identificar casos atípicos en el comportamiento estudiantil.
 * **Visualizaciones:** Genera histogramas de distribución de frecuencias y boxplots de todas las variables involucradas.
 
