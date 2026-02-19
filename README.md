@@ -92,6 +92,28 @@ El propósito de este repositorio es demostrar la aplicación práctica de conce
 
 ---
 
+### 🎯 [lect_05](./lect_05/) - Modelo de Clasificación: Predicción de Supervivencia en el Titanic
+
+**Objetivo**: Construir y entrenar un modelo de regresión logística para predecir si un pasajero del Titanic sobrevivió o no, aplicando técnicas de optimización de hiperparámetros y evaluación exhaustiva del modelo.
+
+**Contenido**:
+- `titanic_Model.py`: Modelo completo de clasificación con búsqueda de hiperparámetros
+- `ej_regresiónLogística.ipynb`: Notebook educativo del ejemplo base en Jupyter
+- Visualizaciones generadas:
+  - `confusion_matrix_titanic.png`: Matriz de confusión del modelo
+  - `feature_importance_titanic.png`: Gráfico de importancia de características
+
+**Conceptos cubiertos**:
+- Pipeline de scikit-learn (StandardScaler + LogisticRegression)
+- Búsqueda de hiperparámetros con RandomizedSearchCV
+- Validación cruzada (5-fold CV)
+- Codificación de variables categóricas (one-hot encoding)
+- Métricas de evaluación completas (Accuracy, Precision, Recall, F1-score)
+- Matriz de confusión y análisis de predicciones
+- Interpretación de coeficientes y importancia de características
+
+---
+
 ## Tecnologías Utilizadas
 
 - **Python 3.x**
