@@ -114,15 +114,24 @@ El propósito de este repositorio es demostrar la aplicación práctica de conce
 
 ---
 
-## Tecnologías Utilizadas
+### 🌳 [lect_06](./lect_06/) - Modelos de Clasificación con Árboles: Ajuste Académico Estudiantil
 
-- **Python 3.x**
-- **pandas**: Manipulación de datos
-- **NumPy**: Cálculos numéricos
-- **scikit-learn**: Modelos de aprendizaje automático
-- **matplotlib/seaborn**: Visualización de datos
-- **UMAP**: Reducción de dimensionalidad
-- **TensorFlow**: (Configuración en Informe1)
+**Objetivo**: Construir y comparar modelos de clasificación basados en árboles de decisión (Random Forest y Gradient Boosting) para predecir el nivel de ajuste académico (ALTO o BAJO) de estudiantes de Ingeniería de Sistemas.
+
+**Contenido**:
+- `student_adjustment_classification.py`: Script completo de entrenamiento y evaluación de modelos
+- `outputs/`: Directorio con resultados, visualizaciones y reportes generados
+
+**Conceptos cubiertos**:
+- Modelos de árboles: Random Forest y Gradient Boosting
+- Búsqueda de hiperparámetros con GridSearchCV
+- Validación cruzada (3-fold CV)
+- Métricas de clasificación multiconjunto (train, validation, test)
+- Visualización de árboles de decisión con `plot_tree`
+- Análisis de importancia de características
+- Matrices de confusión y curvas ROC
+- Comparación de modelos y selección del mejor modelo
+- Exportación de visualizaciones y reportes
 
 ## Requisitos
 

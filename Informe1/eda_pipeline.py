@@ -298,7 +298,7 @@ print(f"Numeric features: {NUM_COLS}")
 # Split into train (70%), val (15%) and test (15%) with stratification
 X_train, X_temp, y_train, y_temp = train_test_split(
     X, y,
-    test_size=0.30,
+    test_size=0.40,
     stratify=y,
     random_state=42
 )
