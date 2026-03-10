@@ -520,7 +520,7 @@ plt.close()
 
 print("Computing t-SNE (this may take a moment)...")
 perplexity_value = min(30, max(5, len(df_viz_train) - 1))
-tsne = TSNE(n_components=2, random_state=42, perplexity=perplexity_value, n_iter=1000)
+tsne = TSNE(n_components=2, random_state=42, perplexity=perplexity_value, max_iter=1000)
 tsne_result = tsne.fit_transform(df_viz_train.drop(columns=['label']))
 tsne_df = pd.DataFrame(tsne_result, columns=["Dim1", "Dim2"])
 tsne_df['label'] = y_train.values
@@ -635,9 +635,9 @@ print(f"  - Original numeric features: {len(numeric_features)}")
 print(f"  - Highly correlated features removed: {len(to_drop)}")
 
 print("\nDATA SPLITTING (TEMPORAL)")
-print(f"  - Training set: {X_train_scaled.shape[0]} samples (years: {train_years.tolist()})")
-print(f"  - Validation set: {X_val_scaled.shape[0]} samples (years: {val_years.tolist()})")
-print(f"  - Test set: {X_test_scaled.shape[0]} samples (years: {test_years.tolist()})")
+print(f"  - Training set: {X_train_scaled.shape[0]} samples (years: {train_years})")
+print(f"  - Validation set: {X_val_scaled.shape[0]} samples (years: {val_years})")
+print(f"  - Test set: {X_test_scaled.shape[0]} samples (years: {test_years})")
 
 print("\nPREPROCESSING APPLIED")
 print(f"  - Missing value handling: Median imputation (pre and post-split)")
