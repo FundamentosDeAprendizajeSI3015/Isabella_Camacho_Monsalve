@@ -133,6 +133,53 @@ El propósito de este repositorio es demostrar la aplicación práctica de conce
 - Comparación de modelos y selección del mejor modelo
 - Exportación de visualizaciones y reportes
 
+---
+
+### 🏦 [lect_08](./lect_08/) - EDA y Modelado del Dataset FIRE UdeA
+
+**Objetivo**: Realizar un análisis exploratorio completo y desarrollar un modelo de Random Forest para clasificación del dataset sintético FIRE UdeA Realista, abordando desafíos como desbalance de clases y data leakage.
+
+**Contenido**:
+- `eda_pipeline_fixed.py`: Pipeline completo de análisis exploratorio, preprocesamiento y visualización
+- `random_forest_fire_model.py`: Modelo de Random Forest con correcciones para desbalance de clases
+- `datasets/`: Datasets sintéticos FIRE UdeA (original y realista)
+- `outputs/`: Visualizaciones EDA y análisis exploratorio
+- `outputs_modelo/`: Métricas y reportes del modelo
+
+**Conceptos cubiertos**:
+- Pipeline EDA completo con múltiples visualizaciones
+- Manejo de datos faltantes (imputación)
+- Desbalance de clases y técnicas de remuestreo
+- Reducción de dimensionalidad (PCA, t-SNE, UMAP)
+- División temporal de datos (time-series aware split)
+- Validación cruzada estratificada (StratifiedKFold)
+- Random Forest Classifier con ajuste de hiperparámetros
+- Métricas apropiadas para clases desbalanceadas (ROC-AUC, Precision-Recall, F1-score)
+- Curvas de desempeño (ROC, Precision-Recall)
+- Prevención de data leakage en pipelines de ML
+
+---
+
+### 🔀 [lect_09](./lect_09/) - Análisis de Clustering - FIRE UdeA Realista
+
+**Objetivo**: Realizar un análisis completo de agrupamiento (clustering) utilizando K-Means y DBSCAN sobre el dataset sintético FIRE UdeA Realista, determinando el número óptimo de clusters.
+
+**Contenido**:
+- `fire_clustering_analysis.py`: Script completo de análisis de clustering
+- `outputs/`: Gráficas de clustering y análisis del método del codo
+- `README.md`: Documentación detallada del análisis
+
+**Conceptos cubiertos**:
+- Preprocesamiento con StandardScaler
+- K-Means Clustering con búsqueda de K óptimo
+- Método del Codo (Elbow Method) para determinación de clusters
+- Silhouette Score para evaluación de calidad de clustering
+- DBSCAN para clustering basado en densidad
+- PCA para visualización en 2D de datos de alta dimensionalidad
+- Análisis de distribución de clusters
+- Identificación de puntos de ruido (DBSCAN)
+- Generación de visualizaciones en alta resolución
+
 ## Requisitos
 
 Para ejecutar cualquiera de los scripts, asegúrate de tener instaladas las siguientes librerías:
