@@ -38,9 +38,9 @@ warnings.filterwarnings('ignore')
 # Opciones disponibles:
 #   - '../lect_08/datasets/dataset_sintetico_FIRE_UdeA.csv'
 #   - '../lect_08/datasets/dataset_sintetico_FIRE_UdeA_realista.csv'
-DATASET_PATH = '../lect_08/datasets/dataset_sintetico_FIRE_UdeA_realista.csv'
+DATASET_PATH = '../lect_08/datasets/dataset_sintetico_FIRE_UdeA.csv'
 
-OUTPUT_DIR = './outputs'
+OUTPUT_DIR = './outputs_pocas_dim'
 
 # Crear directorio de outputs si no existe
 Path(OUTPUT_DIR).mkdir(exist_ok=True)
@@ -99,15 +99,6 @@ else:
 # Excluir columnas no numéricas y la columna target
 numeric_df = df.select_dtypes(include=[np.number]).copy()
 columns_to_exclude = [target_col]
-
-# Excluir también columnas que parecen ser identificadores (muy pocas muestras únicas por valor)
-for col in numeric_df.columns:
-    if col != target_col:
-        unique_ratio = numeric_df[col].nunique() / len(numeric_df)
-        # Si tiene muy pocas muestras por valor único (parece un ID)
-        if unique_ratio > 0.9 and numeric_df[col].nunique() > 100:
-            columns_to_exclude.append(col)
-            print(f"Columna '{col}' excluida (parece ser un identificador)")
 
 # Crear conjunto de características
 X = numeric_df.drop(columns=columns_to_exclude, errors='ignore').copy()
@@ -675,9 +666,9 @@ Distribución de Clusters:
 if n_clusters_dbscan > 0:
     report_content += f"""
 Métricas de Calidad:
-  - Silhouette Score: {dbscan_silhouette:.4f}
-  - Davies-Bouldin Index: {dbscan_davies_bouldin:.4f}
-  - Calinski-Harabasz Score: {dbscan_calinski:.4f}
+  - Silhouette Score: {dbscan_silhouette if n_clusters_dbscan > 1 else 'N/A'}
+  - Davies-Bouldin Index: {dbscan_davies_bouldin if n_clusters_dbscan > 1 else 'N/A'}
+  - Calinski-Harabasz Score: {dbscan_calinski if n_clusters_dbscan > 1 else 'N/A'}
 
 Matriz de Confusión DBSCAN:
 {cm_dbscan}

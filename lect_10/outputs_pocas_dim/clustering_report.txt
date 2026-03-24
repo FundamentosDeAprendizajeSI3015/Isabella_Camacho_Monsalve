@@ -1,0 +1,105 @@
+
+================================================================================
+REPORTE DE ANÁLISIS: K-MEANS vs DBSCAN
+Dataset: dataset_sintetico_FIRE_UdeA.csv
+================================================================================
+
+1. INFORMACIÓN DEL DATASET
+--------------------------------------------------------------------------------
+Shape: (500, 7)
+Características: 7
+Numero de muestras: 500
+
+Distribución de Labels:
+  - Clase 0: 223 (44.60%)
+  - Clase 1: 277 (55.40%)
+
+2. K-MEANS CLUSTERING (k=2)
+--------------------------------------------------------------------------------
+Distribución de Clusters:
+  - Cluster 0: 247
+  - Cluster 1: 253
+
+Métricas de Calidad:
+  - Silhouette Score: 0.1145
+  - Davies-Bouldin Index: 2.6912
+  - Calinski-Harabasz Score: 65.4995
+
+Matriz de Confusión K-Means:
+[[ 79 144]
+ [168 109]]
+
+
+Análisis para Datos con Label=0:
+  Total de datos con label=0: 223
+  K-Means predijo Cluster 0: 79 (35.43%)
+  K-Means predijo Cluster 1: 144 (64.57%)
+
+Análisis para Datos con Label=1:
+  Total de datos con label=1: 277
+  K-Means predijo Cluster 0: 168 (60.65%)
+  K-Means predijo Cluster 1: 109 (39.35%)
+
+
+3. DBSCAN CLUSTERING
+--------------------------------------------------------------------------------
+Parámetros:
+  - eps: 1.9681
+  - min_samples: 5
+
+Distribución de Clusters:
+  - Número de clusters: 1
+  - Número de puntos de ruido: 10
+
+Métricas de Calidad:
+  - Silhouette Score: N/A
+  - Davies-Bouldin Index: N/A
+  - Calinski-Harabasz Score: N/A
+
+Matriz de Confusión DBSCAN:
+[[223   0]
+ [277   0]]
+
+
+Análisis para Datos con Label=0:
+  Total de datos con label=0: 223
+  DBSCAN predijo Cluster 0: 223 (100.00%)
+
+Análisis para Datos con Label=1:
+  Total de datos con label=1: 277
+  DBSCAN predijo Cluster 0: 277 (100.00%)
+
+
+4. PCA ANÁLISIS
+--------------------------------------------------------------------------------
+Varianza explicada:
+  - PC1: 0.1689 (16.89%)
+  - PC2: 0.1597 (15.97%)
+  - Total: 0.3286 (32.86%)
+
+5. CONCLUSIONES
+--------------------------------------------------------------------------------
+- El análisis se realizó sobre 500 muestras con 7 características.
+- Se identificaron 2 clases en los datos: 0, 1
+- K-Means agrupa los datos en 2 clusters con Silhouette Score de 0.1145
+- DBSCAN encontró 1 cluster(s) con 10 punto(s) de ruido y Silhouette Score de N/A
+- Las gráficas PCA muestran la proyección bidimensional de los datos en el espacio de
+  componentes principales más importantes.
+- La varianza total explicada por PC1 y PC2 es del 32.86%, indicando que
+  la mayoría de la variación en los datos se captura en dos dimensiones.
+
+Archivos generados:
+  - 01_kmeans_pca.png: K-Means clustering en espacio PCA
+  - 02_dbscan_pca.png: DBSCAN clustering en espacio PCA
+  - 03_labels_pca.png: Labels verdaderos en espacio PCA
+  - 04_comparison_kmeans_vs_labels.png: Comparación K-Means vs Labels
+  - 05_comparison_dbscan_vs_labels.png: Comparación DBSCAN vs Labels
+  - 06_confusion_matrices.png: Matrices de confusión
+  - 07_cluster_distribution.png: Distribución de clusters
+  - 08_class_prediction_analysis.png: Análisis de predicciones por clase
+  - 09_clustering_metrics.png: Métricas de clustering
+  - clustering_report.txt: Reporte completo (este archivo)
+
+================================================================================
+Análisis completado exitosamente.
+================================================================================
