@@ -12,8 +12,7 @@ from pathlib import Path
 import plotly.express as px # new import
 
 # Clustering algorithms
-from sklearn.cluster import KMeans, DBSCAN
-from sklearn_extra.cluster import KMedoids
+from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
 from fcmeans import FCM  # For Fuzzy C-Means
 from sklearn.cluster import SpectralClustering
 
@@ -24,6 +23,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.metrics import precision_recall_curve, average_precision_score
 from sklearn.metrics import roc_auc_score, accuracy_score, f1_score
+from sklearn.metrics import roc_curve, auc
 
 # Supervised models
 from sklearn.ensemble import RandomForestClassifier
@@ -45,7 +45,6 @@ X_RAW_PATH = DATA_DIR / "X_raw.parquet"
 Y_PATH = DATA_DIR / "y.parquet"
 
 # Output directory
-# Adjusted to be relative to the script's location within Isabella_Camacho_Monsalve/Informe2
 OUTPUT_DIR = Path("outputs")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -111,9 +110,7 @@ print(f"PCA dimensions (95% variance): {X_pca.shape[1]}")
 print(f"Explained variance ratio: {pca.explained_variance_ratio_.sum():.3f}")
 
 # Create sample for clustering 
-# Given the user mentioned "pocas muestras", the existing logic
-# already handles using the full dataset if smaller than 1000.
-sample_size = min(len(X_raw), 1000)  # Use full dataset if smaller than 1000
+sample_size = min(len(X_raw), 1000)  
 if len(X_raw) <= sample_size:
     print(f"\nUsing full dataset for clustering (n={len(X_raw)})")
     X_cluster = X_pca
@@ -157,9 +154,9 @@ try:
     clustering_results['fcm'] = fcm_labels
 except Exception as e:
     print(f"Fuzzy C-Means failed: {e}")
-    print("Using K-Medoids as alternative...")
-    kmedoids = KMedoids(n_clusters=2, random_state=RANDOM_STATE)
-    fcm_labels = kmedoids.fit_predict(X_cluster)
+    print("Using Hierarchical Clustering as alternative...")
+    agg_clustering = AgglomerativeClustering(n_clusters=2, linkage='ward')
+    fcm_labels = agg_clustering.fit_predict(X_cluster)
     clustering_results['fcm'] = fcm_labels
 
 # 3.3 DBSCAN
@@ -322,7 +319,7 @@ if len(sample_indices) < len(X_raw):
                 fcm_full.fit(X_full_pca)
                 full_labels = fcm_full.predict(X_full_pca)
             except:
-                full_labels = KMedoids(n_clusters=2, random_state=RANDOM_STATE).fit_predict(X_full_pca)
+                full_labels = AgglomerativeClustering(n_clusters=2, linkage='ward').fit_predict(X_full_pca)
         else:  # spectral
             full_labels = SpectralClustering(n_clusters=2, random_state=RANDOM_STATE).fit_predict(X_full_pca)
         
@@ -348,31 +345,56 @@ else:
 print(f"Full dataset - Original positive: {y_full_original.sum()}")
 print(f"Full dataset - Reevaluated positive: {y_full_reevaluated.sum()}")
 
-# Train-test split
-X_train, X_test, y_train_orig, y_test_orig = train_test_split(
-    X_full_scaled, y_full_original, test_size=0.2, stratify=y_full_original, random_state=RANDOM_STATE
+# Train-val-test split (60-20-20)
+print("\nPerforming Train-Val-Test split (60-20-20)...")
+
+# Create indices for splitting
+indices = np.arange(len(X_full_scaled))
+
+# First split: 80% train+val, 20% test
+idx_temp, idx_test = train_test_split(
+    indices, test_size=0.2, stratify=y_full_original.values, random_state=RANDOM_STATE
 )
 
-_, _, y_train_reeval, y_test_reeval = train_test_split(
-    X_full_scaled, y_full_reevaluated, test_size=0.2, stratify=y_full_reevaluated, random_state=RANDOM_STATE
+# Second split: 75% train (of 80%), 25% val (of 80%) -> 60% and 20% of total
+idx_train, idx_val = train_test_split(
+    idx_temp, test_size=0.25, stratify=y_full_original.iloc[idx_temp].values, random_state=RANDOM_STATE
 )
 
-print(f"Train set size: {len(X_train)}")
-print(f"Test set size: {len(X_test)}")
+# Create X and y splits based on indices
+X_train = X_full_scaled[idx_train]
+X_val = X_full_scaled[idx_val]
+X_test_orig = X_full_scaled[idx_test]
+
+y_train_orig = y_full_original.iloc[idx_train].reset_index(drop=True)
+y_val_orig = y_full_original.iloc[idx_val].reset_index(drop=True)
+y_test_orig = y_full_original.iloc[idx_test].reset_index(drop=True)
+
+y_train_reeval = y_full_reevaluated.iloc[idx_train].reset_index(drop=True)
+y_val_reeval = y_full_reevaluated.iloc[idx_val].reset_index(drop=True)
+y_test_reeval = y_full_reevaluated.iloc[idx_test].reset_index(drop=True)
+
+print(f"Train set size: {len(X_train)} (60%)")
+print(f"Validation set size: {len(X_val)} (20%)")
+print(f"Test set size: {len(X_test_orig)} (20%)")
 
 # Define models
+rf_model = RandomForestClassifier(n_estimators=100, random_state=RANDOM_STATE, max_depth=10)
+lr_model = LogisticRegression(random_state=RANDOM_STATE, max_iter=1000)
+
 models = {
-    'Random Forest': RandomForestClassifier(n_estimators=100, random_state=RANDOM_STATE),
-    'Logistic Regression': LogisticRegression(random_state=RANDOM_STATE, max_iter=1000)
+    'Random Forest': rf_model,
+    'Logistic Regression': lr_model
 }
 
 # Results storage
 results = []
+trained_pipelines = {}  # Store trained pipelines for visualization
 
 # Train and evaluate models
 for model_name, model in models.items():
-    for label_type, (y_tr, y_te) in [('Original', (y_train_orig, y_test_orig)), 
-                                     ('Reevaluated', (y_train_reeval, y_test_reeval))]:
+    for label_type, (y_tr, y_va, y_te) in [('Original', (y_train_orig, y_val_orig, y_test_orig)), 
+                                            ('Reevaluated', (y_train_reeval, y_val_reeval, y_test_reeval))]:
         
         print(f"\nTraining {model_name} with {label_type} labels...")
         
@@ -382,18 +404,29 @@ for model_name, model in models.items():
             ('classifier', model)
         ])
         
-        # Fit model
+        # Fit model on training set
         pipeline.fit(X_train, y_tr)
         
-        # Predictions
-        y_pred = pipeline.predict(X_test)
-        y_pred_proba = pipeline.predict_proba(X_test)[:, 1]
+        # Validate on validation set
+        y_val_pred = pipeline.predict(X_val)
+        y_val_pred_proba = pipeline.predict_proba(X_val)[:, 1]
+        
+        val_accuracy = accuracy_score(y_va, y_val_pred)
+        val_f1 = f1_score(y_va, y_val_pred)
+        val_auc_roc = roc_auc_score(y_va, y_val_pred_proba)
+        val_auc_pr = average_precision_score(y_va, y_val_pred_proba)
+        
+        print(f"  Validation - Accuracy: {val_accuracy:.3f}, F1: {val_f1:.3f}, AUC-ROC: {val_auc_roc:.3f}")
+        
+        # Evaluate on test set
+        y_test_pred = pipeline.predict(X_test_orig)
+        y_test_pred_proba = pipeline.predict_proba(X_test_orig)[:, 1]
         
         # Metrics
-        accuracy = accuracy_score(y_te, y_pred)
-        f1 = f1_score(y_te, y_pred)
-        auc_roc = roc_auc_score(y_te, y_pred_proba)
-        auc_pr = average_precision_score(y_te, y_pred_proba)
+        accuracy = accuracy_score(y_te, y_test_pred)
+        f1 = f1_score(y_te, y_test_pred)
+        auc_roc = roc_auc_score(y_te, y_test_pred_proba)
+        auc_pr = average_precision_score(y_te, y_test_pred_proba)
         
         # Store results
         results.append({
@@ -405,10 +438,21 @@ for model_name, model in models.items():
             'AUC-PR': auc_pr
         })
         
-        print(f"  Accuracy: {accuracy:.3f}")
-        print(f"  F1-Score: {f1:.3f}")
-        print(f"  AUC-ROC: {auc_roc:.3f}")
-        print(f"  AUC-PR: {auc_pr:.3f}")
+        # Store trained pipeline for visualization
+        pipeline_key = f"{model_name}_{label_type}"
+        trained_pipelines[pipeline_key] = {
+            'pipeline': pipeline,
+            'X_test': X_test_orig,
+            'y_test': y_te,
+            'y_pred': y_test_pred,
+            'y_pred_proba': y_test_pred_proba
+        }
+        
+        print(f"  Test - Accuracy: {accuracy:.3f}")
+        print(f"  Test - F1-Score: {f1:.3f}")
+        print(f"  Test - AUC-ROC: {auc_roc:.3f}")
+        print(f"  Test - AUC-PR: {auc_pr:.3f}")
+
 
 # ===========================================
 # 7. RESULTS COMPARISON TABLE
@@ -449,15 +493,110 @@ print("-" * 30)
 plt.style.use('default')
 sns.set_palette("husl")
 
+# 8.0 Random Forest Feature Importance and Predictions
+# Create visualizations for Random Forest models
+rf_original_pipeline = trained_pipelines.get('Random Forest_Original')
+rf_reevaluated_pipeline = trained_pipelines.get('Random Forest_Reevaluated')
+
+if rf_original_pipeline and rf_reevaluated_pipeline:
+    print("\nGenerating Random Forest visualizations...")
+    
+    # Get the trained Random Forest classifiers
+    rf_original = rf_original_pipeline['pipeline'].named_steps['classifier']
+    rf_reevaluated = rf_reevaluated_pipeline['pipeline'].named_steps['classifier']
+    
+    # Get feature names
+    feature_names = X_raw.columns
+    
+    # 8.0.1 Feature Importance Comparison
+    fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+    
+    # Original labels
+    importances_orig = rf_original.feature_importances_
+    indices_orig = np.argsort(importances_orig)[-15:]  # Top 15 features
+    
+    axes[0].barh(range(len(indices_orig)), importances_orig[indices_orig], color='steelblue')
+    axes[0].set_yticks(range(len(indices_orig)))
+    axes[0].set_yticklabels([feature_names[i] for i in indices_orig])
+    axes[0].set_xlabel('Importancia')
+    axes[0].set_title('Random Forest - Importancia de Variables\n(Etiquetas Originales)')
+    axes[0].grid(axis='x', alpha=0.3)
+    
+    # Reevaluated labels
+    importances_reeval = rf_reevaluated.feature_importances_
+    indices_reeval = np.argsort(importances_reeval)[-15:]  # Top 15 features
+    
+    axes[1].barh(range(len(indices_reeval)), importances_reeval[indices_reeval], color='coral')
+    axes[1].set_yticks(range(len(indices_reeval)))
+    axes[1].set_yticklabels([feature_names[i] for i in indices_reeval])
+    axes[1].set_xlabel('Importancia')
+    axes[1].set_title('Random Forest - Importancia de Variables\n(Etiquetas Reevaluadas)')
+    axes[1].grid(axis='x', alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig(OUTPUT_DIR / 'random_forest_feature_importance.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    # 8.0.2 Predictions Comparison (Original vs Reevaluated)
+    fig, axes = plt.subplots(2, 2, figsize=(15, 12))
+    
+    # Original - Confusion Matrix
+    cm_orig = confusion_matrix(rf_original_pipeline['y_test'], rf_original_pipeline['y_pred'])
+    sns.heatmap(cm_orig, annot=True, fmt="d", cmap="Blues", ax=axes[0, 0],
+                xticklabels=['Bajo Ajuste', 'Alto Ajuste'],
+                yticklabels=['Bajo Ajuste', 'Alto Ajuste'])
+    axes[0, 0].set_title('Random Forest - Matriz de Confusión\n(Etiquetas Originales)')
+    axes[0, 0].set_ylabel('Etiquetas Verdaderas')
+    axes[0, 0].set_xlabel('Predicciones')
+    
+    # Reevaluated - Confusion Matrix
+    cm_reeval = confusion_matrix(rf_reevaluated_pipeline['y_test'], rf_reevaluated_pipeline['y_pred'])
+    sns.heatmap(cm_reeval, annot=True, fmt="d", cmap="Oranges", ax=axes[0, 1],
+                xticklabels=['Bajo Ajuste', 'Alto Ajuste'],
+                yticklabels=['Bajo Ajuste', 'Alto Ajuste'])
+    axes[0, 1].set_title('Random Forest - Matriz de Confusión\n(Etiquetas Reevaluadas)')
+    axes[0, 1].set_ylabel('Etiquetas Verdaderas')
+    axes[0, 1].set_xlabel('Predicciones')
+    
+    # Original - ROC Curve
+    fpr_orig, tpr_orig, _ = roc_curve(rf_original_pipeline['y_test'], rf_original_pipeline['y_pred_proba'])
+    roc_auc_orig = auc(fpr_orig, tpr_orig)
+    axes[1, 0].plot(fpr_orig, tpr_orig, color='steelblue', lw=2, label=f'ROC (AUC = {roc_auc_orig:.3f})')
+    axes[1, 0].plot([0, 1], [0, 1], color='gray', lw=1, linestyle='--', label='Clasificador Aleatorio')
+    axes[1, 0].set_xlim([0.0, 1.0])
+    axes[1, 0].set_ylim([0.0, 1.05])
+    axes[1, 0].set_xlabel('Tasa de Falsos Positivos')
+    axes[1, 0].set_ylabel('Tasa de Verdaderos Positivos')
+    axes[1, 0].set_title('Curva ROC - Random Forest\n(Etiquetas Originales)')
+    axes[1, 0].legend(loc="lower right")
+    axes[1, 0].grid(alpha=0.3)
+    
+    # Reevaluated - ROC Curve
+    fpr_reeval, tpr_reeval, _ = roc_curve(rf_reevaluated_pipeline['y_test'], rf_reevaluated_pipeline['y_pred_proba'])
+    roc_auc_reeval = auc(fpr_reeval, tpr_reeval)
+    axes[1, 1].plot(fpr_reeval, tpr_reeval, color='coral', lw=2, label=f'ROC (AUC = {roc_auc_reeval:.3f})')
+    axes[1, 1].plot([0, 1], [0, 1], color='gray', lw=1, linestyle='--', label='Clasificador Aleatorio')
+    axes[1, 1].set_xlim([0.0, 1.0])
+    axes[1, 1].set_ylim([0.0, 1.05])
+    axes[1, 1].set_xlabel('Tasa de Falsos Positivos')
+    axes[1, 1].set_ylabel('Tasa de Verdaderos Positivos')
+    axes[1, 1].set_title('Curva ROC - Random Forest\n(Etiquetas Reevaluadas)')
+    axes[1, 1].legend(loc="lower right")
+    axes[1, 1].grid(alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig(OUTPUT_DIR / 'random_forest_predictions_analysis.png', dpi=300, bbox_inches='tight')
+    plt.close()
+
 # 8.1 Clustering Results Visualization
-# ── PCA compartido para TODAS las visualizaciones ───────────────────────────
+#PCA for all visualizations
 pca_2d = PCA(n_components=2, random_state=RANDOM_STATE)
 X_vis = pca_2d.fit_transform(X_cluster)
 
 pca_3d = PCA(n_components=3, random_state=RANDOM_STATE)
 X_vis3d = pca_3d.fit_transform(X_cluster)
 
-# ── Clustering visualization (4 subplots) ───────────────────────────────────
+# Clustering visualization (4 subplots) 
 fig, axes = plt.subplots(2, 2, figsize=(15, 12))
 axes = axes.flatten()
 
@@ -490,7 +629,7 @@ plt.tight_layout()
 plt.savefig(OUTPUT_DIR / 'clustering_visualization.png', dpi=300, bbox_inches='tight')
 plt.close()
 
-# ── Distribución original 3D — UNA sola vez ─────────────────────────────────
+# Origina distribution 3D visualization
 y_plot_global = y_cluster.reset_index(drop=True)
 fig_orig_global = px.scatter_3d(
     x=X_vis3d[:, 0], y=X_vis3d[:, 1], z=X_vis3d[:, 2],
@@ -503,7 +642,7 @@ fig_orig_global.update_layout(scene=dict(
 ))
 fig_orig_global.write_html(os.path.join(OUTPUT_DIR, 'dist_3d_original.html'))
 
-# 3.5 Function to map cluster labels to match majority class in y_original
+# Function to map cluster labels to match majority class in y_original
 def map_cluster_labels(cluster_labels, true_labels):
     cluster_labels = pd.Series(cluster_labels).reset_index(drop=True)
     true_labels = true_labels.reset_index(drop=True)
@@ -529,11 +668,10 @@ def map_cluster_labels(cluster_labels, true_labels):
 
     return mapped_labels.astype(int)
 
-# ── Loop por algoritmo ───────────────────────────────────────────────────────
+# For each clustering algorithm
 for algo_name, cluster_label_array in clustering_results.items():
 
     # Get the actual labels from the clustering algorithm before binary mapping
-    # This ensures we plot the *distinct* clusters found by each algorithm
     original_cluster_labels = clustering_results[algo_name] 
 
     if algo_name != "DBSCAN":
@@ -579,15 +717,11 @@ for algo_name, cluster_label_array in clustering_results.items():
     plt.ylabel('PCA Componente 2')
 
     plt.subplot(1, 2, 2)
-    # Use a generic colormap for `labels_to_plot` to show distinct clusters
-    # And ensure the hue is labels_to_plot, not mapped_labels
     unique_plot_labels = np.unique(labels_to_plot)
     n_plot_clusters = len(unique_plot_labels[unique_plot_labels != -1])
-    # Create a divergent colormap for visualization, or 'viridis' like clustering_visualization.
     if algo_name == 'dbscan': # Special handling for DBSCAN noise label -1
-         cmap_name = 'viridis' # or 'Paired', 'Set1' etc.
+         cmap_name = 'viridis' 
          colors = plt.cm.get_cmap(cmap_name, max(n_plot_clusters,1))
-         # Create a custom palette: map -1 to black/grey, then other clusters to cmap
          palette_dict = {lbl: colors(i) for i, lbl in enumerate(unique_plot_labels)}
          if -1 in unique_plot_labels:
              palette_dict[-1] = 'grey' # Assign grey to noise points
@@ -603,7 +737,6 @@ for algo_name, cluster_label_array in clustering_results.items():
     plt.savefig(os.path.join(OUTPUT_DIR, f'dist_comparison_2d_{algo_name}.png'))
     plt.close()
 
-    # 3D: solo el clusterizado
     # Use labels_to_plot instead of mapped_plot to show distinct clusters
     labels_for_3d_plot = pd.Series(labels_to_plot).reset_index(drop=True)
     
@@ -697,6 +830,8 @@ print(f"  - F1-Score: {best_result['F1-Score']:.3f}")
 
 print("\nFiles generated:")
 print(f"  - model_comparison_results.csv")
+print(f"  - random_forest_feature_importance.png")
+print(f"  - random_forest_predictions_analysis.png")
 print(f"  - clustering_visualization.png")
 print(f"  - model_performance_comparison.png")
 print(f"  - label_distribution_comparison.png")
