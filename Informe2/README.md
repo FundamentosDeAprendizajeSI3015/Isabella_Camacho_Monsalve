@@ -44,7 +44,7 @@ Para los algoritmos que no escalan bien a grandes conjuntos de datos (Fuzzy C-Me
 
 Las etiquetas generadas por los algoritmos de clustering se combinan para reevaluar las etiquetas originales de los estudiantes.
 
-1.  **Cálculo de "Lift"**: Cada algoritmo recibe un peso igual a su "lift", que mide cu\u00e1nto supera la tasa base de la clase minoritaria (bajo ajuste) en su cluster "anómalo".
+1.  **Cálculo de "Lift"**: Cada algoritmo recibe un peso igual a su "lift", que mide cuánto supera la tasa base de la clase minoritaria (bajo ajuste) en su cluster "anómalo".
 2.  **Reetiquetado Conservador**: Si una mayoría ponderada de los algoritmos de clustering marca una muestra como "anómala" (indicando bajo ajuste), la etiqueta original se reasigna a "bajo ajuste" (0). Este enfoque es conservador, solo se añaden etiquetas de la clase minoritaria, y las etiquetas existentes de "alto ajuste" (1) nunca se revierten.
 
 ### 3.4. Entrenamiento de Modelos Supervisados
@@ -56,9 +56,9 @@ Se entrenan modelos de clasificación supervisada con las etiquetas originales y
     -   Logistic Regression
 
 -   **Estrategia de Entrenamiento**:
-    -   División del dataset en conjuntos de entrenamiento y prueba (80/20).
+    -   División del dataset en conjuntos train, val, test.
     -   **Balanceo de Clases**: Se aplica SMOTE (Synthetic Minority Over-sampling Technique) en el conjunto de entrenamiento para abordar el desequilibrio de clases, especialmente crucial en datasets con pocas muestras.
-    -   **M\u00e9trica Principal**: Se utiliza el Área bajo la Curva de Precisión-Recall (AUPRC), recomendada para datasets desbalanceados, junto con otras métricas como Precisión, Recall, F1-Score y Accuracy.
+    -   **Métrica Principal**: Se utiliza el Área bajo la Curva de Precisión-Recall (AUPRC), recomendada para datasets desbalanceados, junto con otras métricas como Precisión, Recall, F1-Score y Accuracy.
 
 ### 3.5. Comparación y Visualizaciones
 
