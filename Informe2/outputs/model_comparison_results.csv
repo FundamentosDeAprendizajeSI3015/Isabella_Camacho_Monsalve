@@ -1,0 +1,5 @@
+Model,Labels,Accuracy,F1-Score,AUC-ROC,AUC-PR
+Random Forest,Original,0.875,0.8,0.8984375,0.8741883116883117
+Random Forest,Reevaluated,0.75,0.7,0.8571428571428571,0.81255328005328
+Logistic Regression,Original,0.9583333333333334,0.9333333333333333,1.0,1.0
+Logistic Regression,Reevaluated,0.875,0.8695652173913043,1.0,1.0
