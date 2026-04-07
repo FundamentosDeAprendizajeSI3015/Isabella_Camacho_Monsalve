@@ -25,7 +25,7 @@ np.random.seed(random_state)
 plt.rc('font', family='serif', size=12)
 
 # Crear carpeta outputs si no existe
-output_dir = 'outputs'
+output_dir = 'outputs_pocas_caracteristicas'
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
@@ -37,7 +37,7 @@ print("=" * 80)
 # 1. Cargar y preparar datos
 # ============================================================================
 print("\n[1] Cargando datos...")
-df = pd.read_csv('../lect_08/datasets/dataset_sintetico_FIRE_UdeA_realista.csv')
+df = pd.read_csv('../lect_08/datasets/dataset_sintetico_FIRE_UdeA.csv')
 
 print(f"Dataset cargado: {df.shape[0]} filas, {df.shape[1]} columnas")
 print(f"Columnas: {list(df.columns)}")

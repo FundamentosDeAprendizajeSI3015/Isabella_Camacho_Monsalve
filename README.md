@@ -34,6 +34,31 @@ El propósito de este repositorio es demostrar la aplicación práctica de conce
 
 ---
 
+### 📚 [Informe2](./Informe2/) - Reevaluación de Etiquetas mediante Clustering Ensemblado
+
+**Objetivo**: Utilizar técnicas de aprendizaje no supervisado (clustering) para reevaluar las etiquetas originales de ajuste estudiante-carrera y mejorar la precisión de modelos supervisados.
+
+**Contenido**:
+- `clustering_analysis.py`: Script completo de análisis de clustering y reevaluación de etiquetas
+- `data/`: Directorio con datasets actualizados.
+- `outputs/`: Directorio con gráficos, tablas comparativas y reportes
+- `README.md`: Documentación detallada de metodología y resultados
+
+Nota: Los datos utilizados para el entrenamiento de los modelos se encuentran en la carpeta Informe1/extended_ds, y corresponden a los archivos X_raw.parquet y y.parquet. Estos son el resultado del pipeline de EDA previamente realizado.
+
+**Conceptos cubiertos**:
+- Preprocesamiento y eliminación de duplicados
+- Reducción de dimensionalidad con PCA (95% varianza)
+- Múltiples algoritmos de clustering: K-Means, Fuzzy C-Means, Subtractive Clustering, DBSCAN
+- Ensemble ponderado con cálculo de "Lift" de cada algoritmo
+- Reetiquetado conservador basado en voto mayoritario del ensemble
+- SMOTE para balance de clases en entrenamiento
+- Comparación de Random Forest y Logistic Regression
+- Métrica principal: AUPRC (Area bajo la Curva Precisión-Recall)
+- Evaluación completa con Precisión, Recall, F1-Score y Accuracy
+
+---
+
 ### 📈 [lect_02](./lect_02/) - Predicción del Rendimiento Estudiantil
 
 **Objetivo**: Construir un modelo de regresión logística para predecir el rendimiento académico (G3 - calificación final) de estudiantes.
@@ -180,12 +205,37 @@ El propósito de este repositorio es demostrar la aplicación práctica de conce
 - Identificación de puntos de ruido (DBSCAN)
 - Generación de visualizaciones en alta resolución
 
+---
+
+### 🔍 [lect_10](./lect_10/) - Análisis Comparativo de Clustering: K-Means vs DBSCAN
+
+**Objetivo**: Desarrollar un análisis comparativo entre K-Means y DBSCAN en el dataset sintético FIRE UdeA, evaluar la calidad de los clustering mediante múltiples métricas y explorar la estabilidad del clustering con UMAP.
+
+**Contenido**:
+- `clustering_analysis.py`: Script análisis comparativo de K-Means vs DBSCAN con visualización PCA
+- `clustering_pipeline_umap_stability.py`: Pipeline de clustering con reducción UMAP y análisis de estabilidad
+- `outputs_pocas_dim/`: Visualizaciones de clustering con pocas dimensiones
+- `outputs_realista/`: Análisis en dataset realista con todas las características
+
+**Conceptos cubiertos**:
+- Preprocesamiento genérico compatible con múltiples datasets
+- Comparación directa: K-Means (k=2) vs DBSCAN
+- Métricas de evaluación de clustering:
+  - Silhouette Score (medida de cohesión y separación)
+  - Davies-Bouldin Index (validación de clusters)
+  - Calinski-Harabasz Index (ratio dispersión/densidad)
+- Visualización multidimensional con PCA
+- Reducción dimensionalidad alternativa con UMAP
+- Estabilidad del clustering bajo diferentes inicializaciones
+- Matriz de confusión y análisis de precisión de predicciones
+- Automatización para trabajar con diferentes datasets
+
 ## Requisitos
 
-Para ejecutar cualquiera de los scripts, asegúrate de tener instaladas las siguientes librerías:
+Para ejecutar cualquiera de los scripts, asegúrate hacer la instalación de las librerías:
 
 ```bash
-pip install pandas numpy scikit-learn matplotlib seaborn umap-learn
+pip install -r requirements.txt
 ```
 
 ## Autor
