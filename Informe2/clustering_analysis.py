@@ -695,7 +695,7 @@ for algo_name, cluster_label_array in clustering_results.items():
 
 
     # Confusion Matrix
-    cm = confusion_matrix(y_cluster, mapped_labels)
+    cm = confusion_matrix(y_cluster, labels_to_plot)
     plt.figure(figsize=(6, 5))
     sns.heatmap(cm, annot=True, fmt="d", cmap="Blues",
                 xticklabels=['Bajo Ajuste (0)', 'Alto Ajuste (1)'],
