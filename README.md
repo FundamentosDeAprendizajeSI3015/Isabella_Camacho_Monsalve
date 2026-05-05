@@ -230,6 +230,33 @@ Nota: Los datos utilizados para el entrenamiento de los modelos se encuentran en
 - Matriz de confusión y análisis de precisión de predicciones
 - Automatización para trabajar con diferentes datasets
 
+---
+
+### 🤖 [svm](./svm/) - Extremality Multiple Kernel Learning (EMKL)
+
+**Objetivo**: Implementación del algoritmo Extremality Multiple Kernel Learning (EMKL) desarrollado como corrección y adaptación del código proporcionado por Miguel Angel Ospina, basado en investigación doctoral en Ingeniería Matemática.
+
+**Contenido**:
+- `data/`: Datasets utilizados en el algoritmo
+- `extremalitymkl/`: Construcción de parámetros de peso del algoritmo y definición de orden de extremalidad
+- `src/`: Implementación de métricas del algoritmo:
+  - Feature Space Measure
+  - Kernel Alignment
+  - Kernel Polarization
+  - Complex Ratio
+  - Construcción de familias de Weak Polynomial Kernels
+  - Combinaciones de kernels
+- `validation_algorithm/`: Scripts de validación, generación de ejemplos y visualización de resultados
+- `requirements.txt`: Dependencias necesarias
+
+**Conceptos cubiertos**:
+- Máquinas de Soporte Vectorial (SVM) avanzadas
+- Multiple Kernel Learning (MKL)
+- Kernels polinómicos débiles con dimensión VC finita
+- Medidas de alineación y polarización de kernels
+- Validación y comparación de algoritmos
+- Visualización de resultados con múltiples familias de kernels
+
 ## Requisitos
 
 Para ejecutar cualquiera de los scripts, asegúrate hacer la instalación de las librerías:
